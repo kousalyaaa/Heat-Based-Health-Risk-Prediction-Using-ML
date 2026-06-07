@@ -1,0 +1,40 @@
+import joblib
+import pandas as pd
+
+def calculate_heat_index(T, RH):
+   
+ 
+    return T + (0.55 - 0.0055 * RH) * (T - 14.5)
+
+def get_risk_label(hi_value):
+    if hi_value < 27: return "🟢 Low Risk (Safe)"
+    elif 27 <= hi_value < 32: return "🟡 Moderate Risk (Caution)"
+    elif 32 <= hi_value < 41: return "🟠 High Risk (Extreme Caution)"
+    else: return "🔴 Severe Risk (Danger)"
+
+print("🧪 TESTING THE MODEL FOR: Madurai")
+
+
+try:
+    model_temp = joblib.load('models/Ariyalur_temp_model.pkl')
+    model_hum = joblib.load('models/Ariyalur_hum_model.pkl')
+    print("✅ Models loaded successfully!")
+except:
+    print("❌ Error: Could not find model files. Did you run train_models.py?")
+    exit()
+
+today_weather = [[38.0, 60.0, 5.0, 0.0]] 
+
+print(f"\n🌤️  Today's Input: Temp={today_weather[0][0]}°C, Humidity={today_weather[0][1]}%")
+
+pred_temp = model_temp.predict(today_weather)[0]
+pred_hum = model_hum.predict(today_weather)[0]
+
+print(f"🔮 AI Prediction for Tomorrow: Temp={pred_temp:.1f}°C, Humidity={pred_hum:.1f}%")
+
+
+hi = calculate_heat_index(pred_temp, pred_hum)
+risk = get_risk_label(hi)
+
+print(f"🌡️  Calculated Heat Index: {hi:.1f}")
+print(f"⚠️  HEALTH FORECAST: {risk}")
